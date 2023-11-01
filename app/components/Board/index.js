@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { MENU_ITEMS } from "../../constant";
-import { menuItemClick, actionItemClick } from "../../slice/menuSlice";
+import { actionItemClick } from "../../slice/menuSlice";
 
 const Board = () => {
   const dispatch = useDispatch();
@@ -28,15 +28,24 @@ const Board = () => {
       actionMenuItem === MENU_ITEMS.UNDO ||
       actionMenuItem === MENU_ITEMS.REDO
     ) {
-      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO)
+      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO) {
         historyPointer.current -= 1;
+        const imageData = drawHistory.current[historyPointer.current];
+        context.putImageData(imageData, 0, 0);
+      }
       if (
         historyPointer.current < drawHistory.current.length - 1 &&
         actionMenuItem === MENU_ITEMS.REDO
-      )
+      ) {
         historyPointer.current += 1;
-      const imageData = drawHistory.current[historyPointer.current];
-      context.putImageData(imageData, 0, 0);
+        const imageData = drawHistory.current[historyPointer.current];
+        context.putImageData(imageData, 0, 0);
+      }
+    } else if (actionMenuItem === MENU_ITEMS.CLEAR) {
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+      context.beginPath();
+      drawHistory.current = [];
+      historyPointer.current = 0;
     }
     dispatch(actionItemClick(null));
   }, [actionMenuItem, dispatch]);
